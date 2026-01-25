@@ -12,6 +12,7 @@ router.use(authMiddleware);
 router.get('/floors/:floorId/tables', tableController.getTables);
 router.post('/', tableController.createTable);
 router.patch('/bulk', tableController.bulkUpdateTables);
+router.patch('/:id/clear', tableController.clearOccupancy);
 router.patch('/:id', tableController.updateTable);
 router.delete('/:id', tableController.deleteTable);
 router.get('/:id/qr', tableController.getTableQR);

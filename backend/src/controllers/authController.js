@@ -53,7 +53,10 @@ exports.signup = asyncHandler(async (req, res) => {
     // Generate and send OTP
     const otp = generateOTP();
     await storeOTP(email, otp, 'signup');
-    await sendOTPEmail(email, otp, 'signup');
+    const emailResult = await sendOTPEmail(email, otp, 'signup');
+    if (!emailResult.success) {
+        throw new AppError('Failed to send OTP email', 500);
+    }
 
     res.status(201).json(
         formatResponse({ userId: user.id }, 'OTP sent to your email. Please verify to complete signup.')
@@ -164,7 +167,10 @@ exports.forgotPassword = asyncHandler(async (req, res) => {
     // Generate and send OTP
     const otp = generateOTP();
     await storeOTP(email, otp, 'reset');
-    await sendOTPEmail(email, otp, 'reset');
+    const emailResult = await sendOTPEmail(email, otp, 'reset');
+    if (!emailResult.success) {
+        throw new AppError('Failed to send OTP email', 500);
+    }
 
     res.json(formatResponse(null, 'OTP sent to your email'));
 });

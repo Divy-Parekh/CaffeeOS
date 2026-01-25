@@ -92,6 +92,7 @@ export const tableApi = {
     delete: (id) => api.delete(`/tables/${id}`),
     getQr: (id) => api.get(`/tables/${id}/qr`),
     downloadAllQr: (shopId) => api.get(`/tables/shops/${shopId}/qr-sheet`, { responseType: 'blob' }),
+    clear: (id) => api.patch(`/tables/${id}/clear`),
 };
 
 // Category API

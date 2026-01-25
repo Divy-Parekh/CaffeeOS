@@ -4,14 +4,17 @@ import { useQuery } from '@tanstack/react-query';
 import { Users } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Select, LoadingCard } from '../../../components/ui';
-import { floorApi } from '../../../services/api';
+
 import { useAppDispatch } from '../../../hooks/useRedux';
 import { setTable } from '../../../store/cartSlice';
+import { floorApi, tableApi } from '../../../services/api';
+import { useQueryClient } from '@tanstack/react-query';
 
 const TableView = () => {
     const { shopId, sessionId } = useParams();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const queryClient = useQueryClient();
     const [selectedFloor, setSelectedFloor] = useState('');
 
     // Fetch floors with tables
@@ -105,6 +108,24 @@ const TableView = () => {
                                     <span className={`text-xs ${status === 'occupied' ? 'text-danger' : 'text-success'}`}>
                                         {status === 'occupied' ? 'Occupied' : 'Available'}
                                     </span>
+
+                                    {status === 'occupied' && (
+                                        <button
+                                            onClick={async (e) => {
+                                                e.stopPropagation();
+                                                try {
+                                                    await tableApi.clear(table.id);
+                                                    queryClient.invalidateQueries({ queryKey: ['floors', shopId] });
+                                                } catch (err) {
+                                                    console.error("Failed to clear table:", err);
+                                                    // Optional: toast error
+                                                }
+                                            }}
+                                            className="mt-2 px-3 py-1 bg-white/10 hover:bg-danger hover:text-white border border-danger/20 rounded-full text-xs text-danger transition-colors z-10"
+                                        >
+                                            Free Table
+                                        </button>
+                                    )}
                                 </motion.button>
                             );
                         })}
@@ -133,7 +154,7 @@ const TableView = () => {
                     <span className="text-sm text-muted-foreground">Occupied</span>
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

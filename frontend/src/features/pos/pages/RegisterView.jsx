@@ -15,13 +15,22 @@ import {
     selectCartSubtotal, selectCartTax, selectCartDiscount, selectCartTip, selectCartTotal
 } from '../../../store/cartSlice';
 import PaymentModal from '../components/PaymentModal';
-import { getSocket, SOCKET_EVENTS } from '../../../services/socket';
+import { getSocket, connectSocket, SOCKET_EVENTS } from '../../../services/socket';
 
 const RegisterView = () => {
     const { shopId, sessionId } = useParams();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const queryClient = useQueryClient();
+
+    // Ensure socket connection on mount
+    React.useEffect(() => {
+        // We don't necessarily need to join the shop room to emit, but we MUST be connected.
+        // using connectSocket(shopId) ensures connection AND joins shop room for updates.
+        if (shopId) {
+            connectSocket(shopId);
+        }
+    }, [shopId]);
 
     const cart = useAppSelector((state) => state.cart);
     const subtotal = useAppSelector(selectCartSubtotal);
@@ -128,6 +137,8 @@ const RegisterView = () => {
             const socket = getSocket();
             socket.emit(SOCKET_EVENTS.NEW_TICKET, { shopId, order });
 
+            // CRITICAL: Update Redux state with orderId so subsequent calls UPDATE this order instead of creating duplicates
+            dispatch(setOrderId(order.id));
             setOrderSent(true);
             queryClient.invalidateQueries({ queryKey: ['orders'] });
         },
@@ -492,7 +503,7 @@ const RegisterView = () => {
                             leftIcon={<Send className="w-5 h-5" />}
                             onClick={handleSendToKitchen}
                             isLoading={createOrderMutation.isPending}
-                            disabled={cart.items.length === 0 || orderSent}
+                            disabled={cart.items.length === 0 || orderSent || !cart.tableId}
                         >
                             {orderSent ? 'Sent' : 'Send'}
                         </Button>
@@ -507,7 +518,7 @@ const RegisterView = () => {
                                     setShowPaymentModal(true);
                                 }
                             }}
-                            disabled={cart.items.length === 0 || !orderSent}
+                            disabled={cart.items.length === 0 || !orderSent || !cart.tableId}
                         >
                             Payment
                         </Button>

@@ -53,6 +53,18 @@ exports.updateTable = asyncHandler(async (req, res) => {
     res.json(formatResponse(table, 'Table updated successfully'));
 });
 
+// Clear table occupancy
+exports.clearOccupancy = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+
+    const table = await prisma.table.update({
+        where: { id },
+        data: { currentOccupancy: 0 },
+    });
+
+    res.json(formatResponse(table, 'Table occupancy cleared'));
+});
+
 // Bulk update tables (activate/deactivate)
 exports.bulkUpdateTables = asyncHandler(async (req, res) => {
     const { tableIds, action } = req.body;

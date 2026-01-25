@@ -71,6 +71,11 @@ const KitchenDisplay = () => {
                 socket.emit('join_shop', shopId);
             });
 
+            // Force join immediately if already connected (in case we missed the 'connect' event)
+            if (socket.connected) {
+                socket.emit('join_shop', shopId);
+            }
+
             socket.on(SOCKET_EVENTS.NEW_TICKET, async (data) => {
                 console.log('🎫 New ticket received:', data);
                 const result = await refetch();

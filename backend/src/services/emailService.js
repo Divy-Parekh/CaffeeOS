@@ -1,33 +1,34 @@
 const transporter = require('../config/nodemailer');
 
 const sendEmail = async ({ to, subject, html, text }) => {
-    try {
-        const mailOptions = {
-            from: process.env.FROM_EMAIL || 'noreply@caffeeos.com',
-            to,
-            subject,
-            html,
-            text,
-        };
+  try {
+    const mailOptions = {
+      from: process.env.FROM_EMAIL || process.env.SMTP_USER,
+      to,
+      subject,
+      html,
+      text,
+    };
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log('📧 Email sent:', info.messageId);
-        return { success: true, messageId: info.messageId };
-    } catch (error) {
-        console.error('❌ Email error:', error.message);
-        return { success: false, error: error.message };
-    }
+    console.log(`📧 Attempting to send email to: ${to} from: ${mailOptions.from}`);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully:', info.messageId);
+    return { success: true, messageId: info.messageId };
+  } catch (error) {
+    console.error('❌ Email error:', error.message);
+    return { success: false, error: error.message };
+  }
 };
 
 // Send OTP Email
 const sendOTPEmail = async (email, otp, purpose = 'signup') => {
-    const subjects = {
-        signup: 'Verify your CaffeeOS account',
-        reset: 'Reset your CaffeeOS password',
-        login: 'Your CaffeeOS login code',
-    };
+  const subjects = {
+    signup: 'Verify your CaffeeOS account',
+    reset: 'Reset your CaffeeOS password',
+    login: 'Your CaffeeOS login code',
+  };
 
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #4F46E5, #7C3AED); padding: 30px; text-align: center;">
         <h1 style="color: white; margin: 0;">☕ CaffeeOS</h1>
@@ -50,19 +51,19 @@ const sendOTPEmail = async (email, otp, purpose = 'signup') => {
     </div>
   `;
 
-    return sendEmail({
-        to: email,
-        subject: subjects[purpose] || 'Your CaffeeOS verification code',
-        html,
-        text: `Your CaffeeOS verification code is: ${otp}. This code expires in 5 minutes.`,
-    });
+  return sendEmail({
+    to: email,
+    subject: subjects[purpose] || 'Your CaffeeOS verification code',
+    html,
+    text: `Your CaffeeOS verification code is: ${otp}. This code expires in 5 minutes.`,
+  });
 };
 
 // Send receipt email
 const sendReceiptEmail = async (email, orderDetails) => {
-    const { orderNumber, items, totalAmount, shopName } = orderDetails;
+  const { orderNumber, items, totalAmount, shopName } = orderDetails;
 
-    const itemsHtml = items.map(item => `
+  const itemsHtml = items.map(item => `
     <tr>
       <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${item.productName}</td>
       <td style="padding: 8px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
@@ -70,7 +71,7 @@ const sendReceiptEmail = async (email, orderDetails) => {
     </tr>
   `).join('');
 
-    const html = `
+  const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <div style="background: linear-gradient(135deg, #4F46E5, #7C3AED); padding: 30px; text-align: center;">
         <h1 style="color: white; margin: 0;">☕ ${shopName}</h1>
@@ -104,16 +105,16 @@ const sendReceiptEmail = async (email, orderDetails) => {
     </div>
   `;
 
-    return sendEmail({
-        to: email,
-        subject: `Receipt for Order #${orderNumber} - ${shopName}`,
-        html,
-        text: `Thank you for your order #${orderNumber}. Total: ₹${totalAmount.toFixed(2)}`,
-    });
+  return sendEmail({
+    to: email,
+    subject: `Receipt for Order #${orderNumber} - ${shopName}`,
+    html,
+    text: `Thank you for your order #${orderNumber}. Total: ₹${totalAmount.toFixed(2)}`,
+  });
 };
 
 module.exports = {
-    sendEmail,
-    sendOTPEmail,
-    sendReceiptEmail,
+  sendEmail,
+  sendOTPEmail,
+  sendReceiptEmail,
 };
