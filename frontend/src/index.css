@@ -1,0 +1,206 @@
+@import "tailwindcss";
+
+@theme {
+  /* Colors - mapped to CSS variables for runtime switching */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Legacy dark colors mapping for compatibility */
+  --color-dark-900: var(--background);
+  --color-dark-800: var(--card);
+  /* Cards map to white in light mode */
+  --color-dark-700: var(--secondary);
+  /* Secondary backgrounds */
+  --color-dark-600: var(--border);
+  /* Borders */
+  --color-dark-500: var(--muted-foreground);
+
+  /* Specific status colors */
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-info: #06b6d4;
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+
+  /* Utilities for gradients */
+  --image-hero-gradient: linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(35 100% 60%) 50%, hsl(45 100% 65%) 100%);
+  --image-text-gradient: linear-gradient(135deg, hsl(25 95% 45%) 0%, hsl(35 100% 55%) 100%);
+  --image-card-gradient: linear-gradient(180deg, hsl(30 25% 99%) 0%, hsl(30 20% 97%) 100%);
+}
+
+:root {
+  /* Light Theme (Refactored - Clean & Modern) */
+  --background: hsl(0 0% 98%); /* Neutral soft off-white, cleaner than yellow-tint */
+  --foreground: hsl(240 10% 3.9%); /* Sharp dark text for contrast */
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(240 10% 3.9%);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(240 10% 3.9%);
+
+  /* Primary: Vibrant Orange */
+  --primary: hsl(24 95% 50%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  /* Secondary: Subtle neutral gray */
+  --secondary: hsl(240 5% 96%);
+  --secondary-foreground: hsl(240 6% 10%);
+
+  --muted: hsl(240 5% 96%);
+  --muted-foreground: hsl(240 4% 46%);
+
+  /* Accent: Light orange wash for interactions */
+  --accent: hsl(24 100% 96%);
+  --accent-foreground: hsl(24 90% 40%);
+
+  /* Borders: crisp light gray */
+  --border: hsl(240 6% 90%);
+  --input: hsl(240 6% 90%);
+  --ring: hsl(24 95% 50%);
+
+  --radius: 0.75rem;
+}
+
+/* Dark Theme (Modern Deep) */
+.dark {
+  --background: hsl(22 15% 8%);
+  /* Deep brownish black */
+  --foreground: hsl(35 20% 96%);
+
+  --card: hsl(22 15% 10%);
+  /* Slightly lighter than bg */
+  --card-foreground: hsl(35 20% 96%);
+
+  --popover: hsl(22 15% 10%);
+  --popover-foreground: hsl(35 20% 96%);
+
+  --primary: hsl(25 85% 55%);
+  /* Bright orange */
+  --primary-foreground: hsl(22 15% 8%);
+
+  --secondary: hsl(22 10% 16%);
+  /* Dark gray-brown */
+  --secondary-foreground: hsl(35 20% 96%);
+
+  --muted: hsl(22 10% 16%);
+  --muted-foreground: hsl(30 5% 65%);
+
+  --accent: hsl(25 85% 55%);
+  --accent-foreground: hsl(22 15% 8%);
+
+  --border: hsl(22 10% 20%);
+  --input: hsl(22 10% 20%);
+  --ring: hsl(25 85% 55%);
+}
+
+/* Base Styles */
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 4px;
+  opacity: 0.5;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* Modern Card Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .glass-card {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Animations */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s ease-out forwards;
+}

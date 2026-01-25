@@ -1,0 +1,265 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum SessionStatus {
+  OPEN
+  CLOSED
+}
+
+enum OrderStatus {
+  DRAFT
+  CONFIRMED
+  PAID
+  CANCELLED
+}
+
+enum KitchenStatus {
+  TO_COOK
+  PREPARING
+  COMPLETED
+  DELIVERED
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  CARD
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(STAFF)
+  isActive  Boolean  @default(true)
+  isVerified Boolean @default(false)
+  shops     Shop[]   @relation("ShopUsers")
+  sessions  Session[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Shop {
+  id               String   @id @default(uuid())
+  name             String
+  slug             String   @unique
+  currency         String   @default("INR")
+  logo             String?
+  
+  // Payment Settings
+  isCashEnabled    Boolean  @default(true)
+  isUpiEnabled     Boolean  @default(false)
+  isDigitalEnabled Boolean  @default(false)
+  upiId            String?
+  bankDetails      Json?
+  
+  // Mobile Ordering Settings
+  selfOrderEnabled   Boolean  @default(false)
+  qrMenuEnabled      Boolean  @default(false)
+  onlineOrderEnabled Boolean  @default(false)
+  themeColor         String   @default("#4F46E5")
+  mobileBgImages     String[]
+  paymentMode        String   @default("PAY_AT_COUNTER")
+  
+  // Stats
+  lastOpenTime   DateTime?
+  lastRevenue    Float     @default(0)
+  
+  // Relations
+  users      User[]      @relation("ShopUsers")
+  floors     Floor[]
+  categories Category[]
+  products   Product[]
+  customers  Customer[]
+  sessions   Session[]
+  orders     Order[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Floor {
+  id        String   @id @default(uuid())
+  name      String
+  sequence  Int      @default(0)
+  shopId    String
+  shop      Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  tables    Table[]
+  createdAt DateTime @default(now())
+}
+
+model Table {
+  id               String   @id @default(uuid())
+  name             String
+  capacity         Int
+  currentOccupancy Int      @default(0)
+  isActive         Boolean  @default(true)
+  token            String   @unique @default(uuid())
+  floorId          String
+  floor            Floor    @relation(fields: [floorId], references: [id], onDelete: Cascade)
+  orders           Order[]
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model Category {
+  id       String    @id @default(uuid())
+  name     String
+  color    String    @default("#6366F1")
+  sequence Int       @default(0)
+  shopId   String
+  shop     Shop      @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  products Product[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([shopId, name])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  image       String?
+  model3d     String?
+  basePrice   Float
+  taxPercent  Float    @default(0)
+  uom         String   @default("unit")
+  isActive    Boolean  @default(true)
+  
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  shopId     String
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  
+  variants   ProductVariant[]
+  orderItems OrderItem[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductVariant {
+  id         String   @id @default(uuid())
+  attribute  String
+  value      String
+  unit       String?
+  extraPrice Float    @default(0)
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  name       String
+  email      String?
+  phone      String?
+  address    String?
+  city       String?
+  state      String?
+  country    String   @default("India")
+  totalSales Float    @default(0)
+  
+  shopId String
+  shop   Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  orders Order[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Session {
+  id           String        @id @default(uuid())
+  shopId       String
+  shop         Shop          @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  
+  status       SessionStatus @default(OPEN)
+  openedAt     DateTime      @default(now())
+  closedAt     DateTime?
+  
+  openingCash  Float         @default(0)
+  closingCash  Float?
+  totalRevenue Float         @default(0)
+  totalOrders  Int           @default(0)
+  
+  orders Order[]
+}
+
+model Order {
+  id          String @id @default(uuid())
+  orderNumber String
+  
+  shopId     String
+  shop       Shop     @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  sessionId  String
+  session    Session  @relation(fields: [sessionId], references: [id])
+  tableId    String?
+  table      Table?   @relation(fields: [tableId], references: [id])
+  customerId String?
+  customer   Customer? @relation(fields: [customerId], references: [id])
+  
+  status        OrderStatus   @default(DRAFT)
+  kitchenStatus KitchenStatus @default(TO_COOK)
+  
+  subtotal    Float
+  taxAmount   Float
+  discount    Float   @default(0)
+  tip         Float   @default(0)
+  totalAmount Float
+  
+  notes    String?
+  isMobile Boolean @default(false)
+  
+  items    OrderItem[]
+  payments Payment[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@unique([shopId, orderNumber])
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  
+  productName String
+  quantity    Int
+  unitPrice   Float
+  taxAmount   Float
+  subtotal    Float
+  
+  variantInfo Json?
+  isPrepared  Boolean @default(false)
+  
+  createdAt DateTime @default(now())
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  method        PaymentMethod
+  amount        Float
+  transactionId String?
+  status        String        @default("COMPLETED")
+  createdAt     DateTime      @default(now())
+}
