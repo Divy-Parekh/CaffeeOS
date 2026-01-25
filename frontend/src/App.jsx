@@ -75,7 +75,7 @@ function App() {
                             </Route>
 
                             {/* Dashboard Routes (Protected) */}
-                            <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+                            <Route element={<ProtectedRoute requiredRole="ADMIN"><DashboardLayout /></ProtectedRoute>}>
                                 <Route path="/" element={<Dashboard />} />
 
                                 {/* Orders */}
@@ -94,15 +94,11 @@ function App() {
                                 <Route path="/settings/:shopId" element={<ShopSettings />} />
 
                                 {/* Reporting */}
-                                {/* Reporting */}
-                                <Route path="/reporting" element={<ReportDashboard />} />
-
-                                {/* Reporting */}
                                 <Route path="/reporting" element={<ReportDashboard />} />
                             </Route>
 
                             {/* POS Terminal Routes (Protected) */}
-                            <Route element={<ProtectedRoute><POSLayout /></ProtectedRoute>}>
+                            <Route element={<ProtectedRoute requiredRole="ADMIN"><POSLayout /></ProtectedRoute>}>
                                 <Route path="/pos/:shopId/:sessionId" element={<Navigate to="register" replace />} />
                                 <Route path="/pos/:shopId/:sessionId/table" element={<TableView />} />
                                 <Route path="/pos/:shopId/:sessionId/register" element={<RegisterView />} />

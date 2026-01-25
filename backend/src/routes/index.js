@@ -33,6 +33,10 @@ router.use('/m', mobileRoutes); // Mobile ordering
 router.use('/reports', reportRoutes);
 router.use('/imagekit', imagekitRoutes);
 
+
+// Test Route
+router.get('/test-email', require('../controllers/testController').testEmail);
+
 // Health check
 router.get('/health', (req, res) => {
     res.json({
